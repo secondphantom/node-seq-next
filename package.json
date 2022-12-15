@@ -1,0 +1,14 @@
+{
+  "name": "seq-next",
+  "version": "0.1.0",
+  "description": "Combine Function",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "basicEg": "node dist/examples/basic.js",
+    "watch": "tsc -w"
+  },
+  "keywords": [],
+  "author": "Second Phantom <second2phantom@gmail.com>",
+  "license": "MIT"
+}
