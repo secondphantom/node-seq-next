@@ -65,7 +65,7 @@ const pathFn = async () => {
       prev.data = ++prev.data;
       // you can route other path fn
       if (prev.data) {
-        next("otherPath");
+        next("root");
       }
     },
     (prev, ret, next) => {

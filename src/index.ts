@@ -1,22 +1,20 @@
-export type Prev = {
-  data: any;
+export type Prev<T = any> = {
+  data: T;
   [key: string]: any;
 };
 
-export type ExtendedPrev = ExtendData<Prev>;
-
-export type SeqFn<T = any> = (
+export type SeqFn<T = any, P = string> = (
   prev: T,
   ret: ReturnFn,
-  next: NextFn
+  next: NextFn<P>
 ) => Promise<any> | any;
 
-export type NextFn = (path?: string) => void;
+export type NextFn<T = string> = (path?: T) => void;
 
-export type ReturnFn = (val: any) => void;
+export type ReturnFn = (val?: any) => void;
 
-export type IterPath = {
-  [key: string]: IterableIterator<any>;
+export type IterPath<T extends string | number | symbol> = {
+  [key in T]: IterableIterator<any>;
 };
 type AnyObj = {
   [key: string]: any;
@@ -26,8 +24,11 @@ export type ExtendData<T> = AnyObj & {
   [key in keyof T]: any;
 };
 
-export default class SeqNext<T extends { [key: string]: any } = Prev> {
-  private iterPath: IterPath = {};
+export default class SeqNext<
+  T extends { [key: string]: any } = Prev,
+  P = string
+> {
+  private iterPath: IterPath<string> = {};
   private curIter: IterableIterator<any> = [][Symbol.iterator]();
   prev: T | undefined;
   private isRetExist = false;
@@ -41,13 +42,13 @@ export default class SeqNext<T extends { [key: string]: any } = Prev> {
   }
 
   seq = async <TS extends { [key: string]: any } = T, R = Promise<TS>>(
-    data?: TS | SeqFn<TS>,
-    ...iterable: SeqFn<ExtendData<TS>>[]
+    data?: TS | SeqFn<TS, P>,
+    ...iterable: SeqFn<ExtendData<TS>, P>[]
   ) => {
     if (!data) {
       if (!this.iterPath["root"]) throw new Error("need root path");
       this.curIter = this.iterPath["root"];
-      if (!this.prev) this.prev = { data: null } as any as T;
+      if (!this.prev) this.prev = { data: {} } as any as T;
       return this.next() as R;
     }
     if (
@@ -55,7 +56,7 @@ export default class SeqNext<T extends { [key: string]: any } = Prev> {
       data.constructor.name === "Function"
     ) {
       this.curIter = [data, ...iterable][Symbol.iterator]();
-      if (!this.prev) this.prev = { data: null } as any as T;
+      if (!this.prev) this.prev = { data: {} } as any as T;
       return this.next() as R;
     }
 
@@ -71,12 +72,13 @@ export default class SeqNext<T extends { [key: string]: any } = Prev> {
   };
 
   path = <TP extends { [key: string]: any } = T>(
-    path: string,
-    ...iterable: SeqFn<ExtendData<TP>>[]
+    path: P,
+    ...iterable: SeqFn<ExtendData<TP>, P>[]
   ) => {
-    if (this.iterPath[path]) throw new Error("path need to be unique");
+    if (this.iterPath[path as string])
+      throw new Error("path need to be unique");
 
-    this.iterPath[path] = iterable[Symbol.iterator]();
+    this.iterPath[path as string] = iterable[Symbol.iterator]();
   };
 
   private next = () => {
@@ -100,7 +102,7 @@ export default class SeqNext<T extends { [key: string]: any } = Prev> {
     if (path) this.curIter = this.iterPath[path];
   };
 
-  private ret = (val: any) => {
+  private ret = (val?: any) => {
     this.isRetExist = true;
     this.prev = val;
   };
