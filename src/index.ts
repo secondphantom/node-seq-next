@@ -3,11 +3,12 @@ export type Prev = {
   [key: string]: any;
 };
 
-export type SeqFn<T> = (
+export type ExtendedPrev = ExtendData<Prev>;
+
+export type SeqFn<T = any> = (
   prev: T,
   ret: ReturnFn,
-  next: NextFn,
-  branch?: string
+  next: NextFn
 ) => Promise<any> | any;
 
 export type NextFn = (path?: string) => void;
@@ -40,7 +41,7 @@ export default class SeqNext<T extends { [key: string]: any } = Prev> {
   }
 
   seq = async <TS extends { [key: string]: any } = T, R = Promise<TS>>(
-    data?: TS | SeqFn<ExtendData<TS>>,
+    data?: TS | SeqFn<TS>,
     ...iterable: SeqFn<ExtendData<TS>>[]
   ) => {
     if (!data) {
