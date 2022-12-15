@@ -34,6 +34,8 @@ const basicFn = async () => {
       console.log("Basic: delayed");
       await delay(1000);
       prev.data = ++prev.data;
+
+      ret(prev);
       // If not add execute next() return prev.
     }
   );
@@ -42,7 +44,7 @@ const basicFn = async () => {
   /* 	
 		Basic: { data: 1, etc: 1 }
 		Basic: { data: 2, etc: 1 }
-		Basic: { data: 3, etc: 1 }
+		Basic Eg. result: { data: 4, etc: 1 }
 		Basic: delayed
 		Basic Eg. result: { data: 3, etc: 1 } 
 	*/
@@ -59,7 +61,7 @@ const pathFn = async () => {
       console.log("Root:", prev);
       prev.data = ++prev.data;
     },
-    async (prev, ret, next) => {
+    (prev, ret, next) => {
       console.log("Root:", prev);
       prev.data = ++prev.data;
       // you can route other path fn
@@ -136,7 +138,7 @@ const returnFn = async () => {
 		Basic: { data: 2, etc: 1 }
 		Basic: { data: 3, etc: 1 }
 		Basic: delayed
-		Basic Eg. result: { data: 3, etc: 1 }
+		Basic Eg. result: { data: 4, etc: 1 }
 		-------------------------------------
 		Root: { data: 1, etc: 1 }
 		Root: { data: 2, etc: 1 }

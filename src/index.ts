@@ -75,23 +75,25 @@ export default class SeqNext<T extends { [key: string]: any } = DefaultPrev> {
     this.iterPath[path] = iterable[Symbol.iterator]();
   };
 
-  private next = (path?: string) => {
-    if (path) this.curIter = this.iterPath[path];
-
+  private next = () => {
     this.cur = this.curIter.next();
     const asyncNext = (): any => {
       if (this.isRetExist) return this.prev;
       if (this.cur.done) return this.prev;
       if (this.cur.value.constructor.name === "AsyncFunction") {
-        return this.cur.value(this.prev, this.ret, this.next).then(() => {
+        return this.cur.value(this.prev, this.ret, this.nextPath)?.then(() => {
           return this.next();
         });
       } else {
-        this.cur.value(this.prev, this.ret, this.next, this.next);
+        this.cur.value(this.prev, this.ret, this.nextPath);
         return this.next();
       }
     };
     return asyncNext();
+  };
+
+  private nextPath = (path?: string) => {
+    if (path) this.curIter = this.iterPath[path];
   };
 
   private ret = (val: any) => {
