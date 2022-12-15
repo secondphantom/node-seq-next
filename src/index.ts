@@ -1,18 +1,18 @@
-export type DefaultPrev = {
+export type Prev = {
   data: any;
   [key: string]: any;
 };
 
-export type Prev<T = DefaultPrev> = T;
-
 export type SeqFn<T> = (
   prev: T,
-  ret: any | undefined,
+  ret: ReturnFn,
   next: NextFn,
   branch?: string
 ) => Promise<any> | any;
 
 export type NextFn = (path?: string) => void;
+
+export type ReturnFn = (val: any) => void;
 
 export type IterPath = {
   [key: string]: IterableIterator<any>;
@@ -25,12 +25,13 @@ export type ExtendData<T> = AnyObj & {
   [key in keyof T]: any;
 };
 
-export default class SeqNext<T extends { [key: string]: any } = DefaultPrev> {
+export default class SeqNext<T extends { [key: string]: any } = Prev> {
   private iterPath: IterPath = {};
   private curIter: IterableIterator<any> = [][Symbol.iterator]();
   prev: T | undefined;
   private isRetExist = false;
   private cur: any;
+  static NextFn: any;
 
   constructor(data?: T) {
     if (data) {
@@ -45,6 +46,7 @@ export default class SeqNext<T extends { [key: string]: any } = DefaultPrev> {
     if (!data) {
       if (!this.iterPath["root"]) throw new Error("need root path");
       this.curIter = this.iterPath["root"];
+      if (!this.prev) this.prev = { data: null } as any as T;
       return this.next() as R;
     }
     if (
@@ -52,6 +54,7 @@ export default class SeqNext<T extends { [key: string]: any } = DefaultPrev> {
       data.constructor.name === "Function"
     ) {
       this.curIter = [data, ...iterable][Symbol.iterator]();
+      if (!this.prev) this.prev = { data: null } as any as T;
       return this.next() as R;
     }
 

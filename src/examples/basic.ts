@@ -14,7 +14,6 @@ const basicFn = async () => {
   // don't set primitive value at prev
   const seqNext = new SeqNext({ data: 1, etc: 1 });
   seqNext.prev = { data: 1, etc: 1 };
-
   // run sequence
   const result = await seqNext.seq(
     { data: 1, etc: 1 }, // set prev value is optional
