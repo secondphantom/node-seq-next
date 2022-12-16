@@ -12,7 +12,7 @@ const delay = (ms: number, res?: any) => {
 const basicFn = async () => {
   // Set prev or init value
   // don't set primitive value at prev
-  const seqNext = new SeqNext({ data: 1, etc: 1 });
+  const seqNext = new SeqNext({ initPrev: { data: 1, etc: 1 } });
   seqNext.prev = { data: 1, etc: 1 };
   // run sequence
   const result = await seqNext.seq(
@@ -51,7 +51,7 @@ const basicFn = async () => {
 
 // path
 const pathFn = async () => {
-  const seqNext = new SeqNext({ data: 1, etc: 1 });
+  const seqNext = new SeqNext({ initPrev: { data: 1, etc: 1 } });
 
   // root is basic path if not set seq Fn run root path
   seqNext.path(
@@ -65,7 +65,7 @@ const pathFn = async () => {
       prev.data = ++prev.data;
       // you can route other path fn
       if (prev.data) {
-        next("root");
+        next("otherPath");
       }
     },
     (prev, ret, next) => {
@@ -101,7 +101,7 @@ const pathFn = async () => {
 
 // immediately return
 const returnFn = async () => {
-  const seqNext = new SeqNext({ data: 1, etc: 1 });
+  const seqNext = new SeqNext({ initPrev: { data: 1, etc: 1 } });
   const result = await seqNext.seq(
     (prev, ret, next) => {
       console.log("Return:", prev);

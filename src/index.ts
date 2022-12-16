@@ -14,7 +14,7 @@ export type NextFn<T = string> = (path?: T) => void;
 export type ReturnFn = (val?: any) => void;
 
 export type IterPath<T extends string | number | symbol> = {
-  [key in T]: IterableIterator<any>;
+  [key in T]: Array<any> | IterableIterator<any>;
 };
 type AnyObj = {
   [key: string]: any;
@@ -31,13 +31,18 @@ export default class SeqNext<
   private iterPath: IterPath<string> = {};
   private curIter: IterableIterator<any> = [][Symbol.iterator]();
   prev: T | undefined;
+  autoReset = true;
   private isRetExist = false;
   private cur: any;
   static NextFn: any;
 
-  constructor(data?: T) {
-    if (data) {
-      this.prev = data;
+  constructor(options?: { initPrev?: T; autoReset?: boolean }) {
+    if (options && options.initPrev) {
+      this.prev = options.initPrev;
+    }
+    if (options) {
+      this.autoReset =
+        options.autoReset === undefined ? true : options.autoReset;
     }
   }
 
@@ -45,9 +50,11 @@ export default class SeqNext<
     data?: TS | SeqFn<TS, P>,
     ...iterable: SeqFn<ExtendData<TS>, P>[]
   ) => {
+    this.isRetExist = false;
+
     if (!data) {
       if (!this.iterPath["root"]) throw new Error("need root path");
-      this.curIter = this.iterPath["root"];
+      this.curIter = this.iterPath["root"][Symbol.iterator]();
       if (!this.prev) this.prev = { data: {} } as any as T;
       return this.next() as R;
     }
@@ -64,7 +71,7 @@ export default class SeqNext<
 
     if (iterable.length == 0) {
       if (!this.iterPath["root"]) throw new Error("need root path");
-      this.curIter = this.iterPath["root"];
+      this.curIter = this.iterPath["root"][Symbol.iterator]();
       return this.next() as R;
     }
     this.curIter = iterable[Symbol.iterator]();
@@ -77,12 +84,16 @@ export default class SeqNext<
   ) => {
     if (this.iterPath[path as string])
       throw new Error("path need to be unique");
-
+    if (this.autoReset) {
+      this.iterPath[path as string] = iterable;
+      return;
+    }
     this.iterPath[path as string] = iterable[Symbol.iterator]();
   };
 
   private next = () => {
     this.cur = this.curIter.next();
+
     const asyncNext = (): any => {
       if (this.isRetExist) return this.prev;
       if (this.cur.done) return this.prev;
@@ -99,7 +110,7 @@ export default class SeqNext<
   };
 
   private nextPath = (path?: string) => {
-    if (path) this.curIter = this.iterPath[path];
+    if (path) this.curIter = this.iterPath[path][Symbol.iterator]();
   };
 
   private ret = (val?: any) => {
