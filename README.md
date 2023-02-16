@@ -10,8 +10,6 @@ SeqNext는 이전 값과 함께 결합된 fn을 순차적으로 실행할 수 �
 ## Table of contents
 - [SeqNext](#seqnext)
 	- [Table of contents](#table-of-contents)
-	- [Installation](#installation)
-		- [From `npm`](#from-npm)
 	- [Usage](#usage)
 		- [Set Previous Value](#set-previous-value)
 		- [`.seq(data?, seqFn()[])`](#seqdata-seqfn)
@@ -25,12 +23,12 @@ SeqNext는 이전 값과 함께 결합된 fn을 순차적으로 실행할 수 �
 		- [Create Path](#create-path)
 		- [Immediately Return](#immediately-return)
 
-## Installation
+<!-- ## Installation
 
 ### From `npm` 
 ```sh
 npm install seq-next       # npm
-```
+``` -->
 ## Usage
 ### Set Previous Value
 ```ts

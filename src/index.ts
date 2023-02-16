@@ -1,5 +1,5 @@
 export type Prev<T = any> = {
-  data: T;
+  data: ExtendData<T>;
   [key: string]: any;
 };
 
@@ -20,8 +20,12 @@ type AnyObj = {
   [key: string]: any;
 };
 
-export type ExtendData<T> = AnyObj & {
-  [key in keyof T]: any;
+export type ExtendData<T> = T & AnyObj;
+
+export type OptionalData<T> = {
+  [key in keyof T]?: T[key] extends { [key: string]: any }
+    ? OptionalData<T[key]>
+    : T[key];
 };
 
 export default class SeqNext<
@@ -30,13 +34,13 @@ export default class SeqNext<
 > {
   private iterPath: IterPath<string> = {};
   private curIter: IterableIterator<any> = [][Symbol.iterator]();
-  prev: T | undefined;
+  prev: OptionalData<T> | undefined;
   autoReset = true;
   private isRetExist = false;
   private cur: any;
   static NextFn: any;
 
-  constructor(options?: { initPrev?: T; autoReset?: boolean }) {
+  constructor(options?: { initPrev?: OptionalData<T>; autoReset?: boolean }) {
     if (options && options.initPrev) {
       this.prev = options.initPrev;
     }
@@ -82,13 +86,12 @@ export default class SeqNext<
     path: P,
     ...iterable: SeqFn<ExtendData<TP>, P>[]
   ) => {
-    if (this.iterPath[path as string])
-      throw new Error("path need to be unique");
+    if (this.iterPath[path as any]) throw new Error("path need to be unique");
     if (this.autoReset) {
-      this.iterPath[path as string] = iterable;
+      this.iterPath[path as any] = iterable;
       return;
     }
-    this.iterPath[path as string] = iterable[Symbol.iterator]();
+    this.iterPath[path as any] = iterable[Symbol.iterator]();
   };
 
   private next = () => {
